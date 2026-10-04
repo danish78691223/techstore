@@ -4,7 +4,7 @@ import { Upload,ArrowLeft,PackagePlus,Link as LinkIcon,Image as ImageIcon,X,Chec
 import api from "../../services/api";
 
 export default function AddProduct(){
- const [form,setForm]=useState({name:"",price:"",stock:"",description:""});
+ const [form,setForm]=useState({name:"",price:"",stock:"",description:"",features:""});
  const [image,setImage]=useState(null);
  const [imageUrl,setImageUrl]=useState("");
  const [imageMode,setImageMode]=useState("upload");
@@ -40,6 +40,7 @@ export default function AddProduct(){
        <div className="product-form-grid add-grid"><div>
          <label>Product name<input required placeholder="e.g. Pro Wireless Headset" value={form.name} onChange={e=>set("name",e.target.value)}/></label>
          <div className="split-fields"><label>Price <span>INR</span><input required type="number" min="0" placeholder="0" value={form.price} onChange={e=>set("price",e.target.value)}/></label><label>Stock<input required type="number" min="0" placeholder="0" value={form.stock} onChange={e=>set("stock",e.target.value)}/></label></div>
+          <label>Product features <span className="field-hint">Separate with commas or new lines</span><textarea className="features-input" placeholder="Wireless connectivity, Low-latency audio, 40-hour battery" value={form.features||""} onChange={e=>set("features",e.target.value)}/></label>
          <label>Description<textarea placeholder="Explain what makes this product worth adding to a setup." value={form.description} onChange={e=>set("description",e.target.value)}/></label>
        </div>
        <div className="image-workspace">
