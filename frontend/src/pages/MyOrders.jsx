@@ -1,30 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect,useState } from "react";
+import { Link } from "react-router-dom";
+import { PackageCheck,MapPin,CalendarDays,ArrowRight } from "lucide-react";
 import api from "../services/api";
-export default function MyOrders() {
-  const [orders, setOrders] = useState([]);
-  useEffect(() => {
-    api.get("/orders/my").then((r) => setOrders(r.data));
-  }, []);
-  return (
-    <main className="container page">
-      <h1>My Orders</h1>
-      {orders.map((o) => (
-        <article className="order-card" key={o._id}>
-          <div>
-            <strong>Order #{o._id.slice(-8).toUpperCase()}</strong>
-            <span>{new Date(o.createdAt).toLocaleString()}</span>
-          </div>
-          <div>
-            <span className={`status ${o.status.toLowerCase()}`}>
-              {o.status}
-            </span>
-            <strong>Rs {o.total_price.toLocaleString("en-IN")}</strong>
-          </div>
-          <p>{o.items.map((i) => `${i.name} × ${i.quantity}`).join(" • ")}</p>
-          <small>{o.address}</small>
-        </article>
-      ))}
-      {!orders.length && <p className="empty">No orders yet.</p>}
-    </main>
-  );
+export default function MyOrders(){
+ const [orders,setOrders]=useState([]),[loading,setLoading]=useState(true);
+ useEffect(()=>{api.get("/orders/my").then(r=>setOrders(r.data)).catch(console.error).finally(()=>setLoading(false));},[]);
+ return <main className="container page orders-page"><div className="section-head"><div><p className="eyebrow">YOUR TECH JOURNEY</p><h1>My orders</h1><p className="muted">Everything you have bought, in one clean timeline.</p></div><Link className="ghost-button" to="/products">Keep shopping <ArrowRight size={16}/></Link></div>
+ {loading?<div className="order-loading">Loading your orders...</div>:orders.map(o=><article className="order-card premium-order" key={o._id}><div className="order-top"><div><span className="order-id">ORDER #{o._id.slice(-8).toUpperCase()}</span><strong>{o.status}</strong></div><span className={"status "+o.status.toLowerCase()}>{o.status}</span></div><div className="order-meta"><span><CalendarDays size={14}/>{new Date(o.createdAt).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}</span><span><MapPin size={14}/>{o.address}</span><strong>Rs {Number(o.total_price||0).toLocaleString("en-IN")}</strong></div><div className="order-items">{o.items?.map((i,index)=><div key={index}><div className="mini-product"><PackageCheck size={15}/><span>{i.name}</span></div><span>× {i.quantity}</span></div>)}</div><div className="order-progress"><i className={o.status==="Pending"||o.status==="Shipped"||o.status==="Delivered"?"done":""}></i><i className={o.status==="Shipped"||o.status==="Delivered"?"done":""}></i><i className={o.status==="Delivered"?"done":""}></i></div><div className="progress-labels"><span>Placed</span><span>Shipped</span><span>Delivered</span></div></article>)}
+ {!loading&&!orders.length&&<div className="empty"><p className="eyebrow">NO ORDERS YET</p><h2>Your next upgrade is waiting.</h2><p>Browse the collection and build a setup you actually enjoy using.</p><Link className="hero-btn" to="/products">Shop products <ArrowRight size={17}/></Link></div>}</main>;
 }
