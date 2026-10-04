@@ -1,69 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, UserPlus, ArrowRight, ShieldCheck } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-export default function Register() {
-  const [form, setForm] = useState({
-      name: "",
-      email: "",
-      password: "",
-      confirm_password: "",
-    }),
-    [error, setError] = useState("");
-  const { register } = useAuth();
-  const nav = useNavigate();
-  const submit = async (e) => {
-    e.preventDefault();
-    try {
-      await register(form);
-      nav("/");
-    } catch (x) {
-      setError(x.response?.data?.message || "Registration failed");
-    }
-  };
-  return (
-    <main className="auth-page">
-      <div className="auth-card">
-        <div className="brand big">
-          TECH NEXUS<span>EST. 2012</span>
-        </div>
-        <h2>Create Account</h2>
-        {error && <div className="error">{error}</div>}
-        <form onSubmit={submit}>
-          <input
-            placeholder="Full Name"
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <input
-            type="email"
-            placeholder="Email Address"
-            required
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            required
-            value={form.confirm_password}
-            onChange={(e) =>
-              setForm({ ...form, confirm_password: e.target.value })
-            }
-          />
-          <button className="primary">Create Account</button>
-        </form>
-        <p>
-          Already registered? <Link to="/login">Login</Link>
-        </p>
-      </div>
-    </main>
-  );
+export default function Register(){
+ const [form,setForm]=useState({name:"",email:"",password:"",confirm_password:""}),[error,setError]=useState(""),[show,setShow]=useState(false),[busy,setBusy]=useState(false);
+ const {register}=useAuth(),nav=useNavigate();
+ const submit=async e=>{e.preventDefault();setError("");if(form.password!==form.confirm_password)return setError("Passwords do not match");setBusy(true);try{await register(form);nav("/");}catch(x){setError(x.response?.data?.message||"Registration failed");}finally{setBusy(false);}};
+ return <main className="auth-page"><div className="auth-card"><div className="auth-top"><div className="brand big"><span className="brand-mark">TN</span><span>TECH NEXUS<small>SMART TECH. BETTER LIVING.</small></span></div><div className="security-chip"><ShieldCheck size={15}/>Free account</div></div><h2>Build your tech profile.</h2><p className="auth-sub">Save your orders and checkout faster next time.</p>{error&&<div className="error">{error}</div>}<form onSubmit={submit}><label>Full name<input placeholder="Your name" required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label><label>Email address<input type="email" placeholder="you@example.com" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label><label>Password<div className="password-field"><input type={show?"text":"password"} placeholder="Create a password" required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/><button type="button" onClick={()=>setShow(v=>!v)}>{show?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label><label>Confirm password<input type="password" placeholder="Repeat password" required value={form.confirm_password} onChange={e=>setForm({...form,confirm_password:e.target.value})}/></label><button className="primary auth-submit" disabled={busy}>{busy?"Creating...":"Create account"}<UserPlus size={17}/></button></form><p>Already have an account? <Link to="/login">Sign in</Link></p></div></main>;
 }
