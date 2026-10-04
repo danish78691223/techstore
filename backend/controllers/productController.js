@@ -1,4 +1,5 @@
-const normalizeFeatures = (value) => Array.isArray(value) ? value.map(v => String(v).trim()).filter(Boolean).slice(0, 10) : typeof value === "string" ? value.split(/[\n,]/).map(v => v.trim()).filter(Boolean).slice(0, 10) : [];\nimport Product from "../models/Product.js";
+const normalizeFeatures = (value) => Array.isArray(value) ? value.map(v => String(v).trim()).filter(Boolean).slice(0, 10) : typeof value === "string" ? value.split(/[\n,]/).map(v => v.trim()).filter(Boolean).slice(0, 10) : [];
+import Product from "../models/Product.js";
 export async function listProducts(req, res) {
   const limit = Math.min(Number(req.query.limit) || 0, 100);
   const q = {};
