@@ -9,15 +9,20 @@ export function CartProvider({children}){
  const {user}=useAuth();
  const cartKey=getCartKey(user);
  const [items,setItems]=useState(()=>readCart(getCartKey(null)));
+ const [hydratedKey,setHydratedKey]=useState(()=>getCartKey(null));
  const [notice,setNotice]=useState(null);
 
  useEffect(()=>{
-   // Remove the old shared cart key so an old browser cart cannot leak into a new account.
    localStorage.removeItem("tech_cart");
    setItems(readCart(cartKey));
+   setHydratedKey(cartKey);
+   setNotice(null);
  },[cartKey]);
 
- useEffect(()=>{localStorage.setItem(cartKey,JSON.stringify(items));},[cartKey,items]);
+ useEffect(()=>{
+   if(hydratedKey!==cartKey)return;
+   localStorage.setItem(cartKey,JSON.stringify(items));
+ },[cartKey,hydratedKey,items]);
 
  const add=p=>{
    const existing=items.find(i=>i.product===p._id);
