@@ -1,67 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Trash2, Minus, Plus } from "lucide-react";
+import { Link,useNavigate } from "react-router-dom";
+import { Trash2,Minus,Plus,ArrowRight,Sparkles,ShieldCheck } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { assetUrl } from "../services/api";
-export default function Cart() {
-  const { items, remove, update, total } = useCart();
-  const nav = useNavigate();
-  if (!items.length)
-    return (
-      <main className="container page empty">
-        <h1>Your Cart is Empty</h1>
-        <p>Add some tech before checking out.</p>
-        <Link className="hero-btn" to="/products">
-          Browse Products
-        </Link>
-      </main>
-    );
-  return (
-    <main className="container page">
-      <h1>Your Cart</h1>
-      <div className="cart-layout">
-        <section>
-          {items.map((i) => (
-            <div className="cart-item" key={i.product}>
-              <img src={assetUrl(i.image_name)} />
-              <div className="cart-main">
-                <h3>{i.name}</h3>
-                <strong>Rs {i.price.toLocaleString("en-IN")}</strong>
-                <div className="qty">
-                  <button onClick={() => update(i.product, i.quantity - 1)}>
-                    <Minus size={14} />
-                  </button>
-                  <span>{i.quantity}</span>
-                  <button onClick={() => update(i.product, i.quantity + 1)}>
-                    <Plus size={14} />
-                  </button>
-                </div>
-              </div>
-              <button className="icon-danger" onClick={() => remove(i.product)}>
-                <Trash2 />
-              </button>
-            </div>
-          ))}
-        </section>
-        <aside className="summary">
-          <h2>Order Summary</h2>
-          <div>
-            <span>Subtotal</span>
-            <strong>Rs {total.toLocaleString("en-IN")}</strong>
-          </div>
-          <div>
-            <span>Shipping</span>
-            <strong>Free</strong>
-          </div>
-          <hr />
-          <div className="total">
-            <span>Total</span>
-            <strong>Rs {total.toLocaleString("en-IN")}</strong>
-          </div>
-          <button className="primary" onClick={() => nav("/checkout")}>
-            Proceed to Checkout
-          </button>
-        </aside>
-      </div>
-    </main>
-  );
+import { useEffect,useState } from "react";
+import api from "../services/api";
+import ProductCard from "../components/ProductCard";
+export default function Cart(){
+ const {items,remove,update,total}=useCart();const nav=useNavigate();const [suggestions,setSuggestions]=useState([]);
+ useEffect(()=>{api.get("/products?limit=4").then(r=>setSuggestions(r.data.filter(p=>!items.some(i=>i.product===p._id)).slice(0,4))).catch(()=>{});},[items]);
+ if(!items.length)return <main className="container page empty"><div className="empty-icon"><Sparkles/></div><p className="eyebrow">YOUR CART</p><h1>Nothing here yet.</h1><p>Start with one great upgrade, then build the rest of your setup.</p><Link className="hero-btn" to="/products">Browse the collection <ArrowRight size={17}/></Link></main>;
+ return <main className="container page cart-page"><div className="section-head"><div><p className="eyebrow">READY TO CHECK OUT?</p><h1>Your cart</h1></div><span className="cart-count">{items.length} product{items.length>1?"s":""}</span></div><div className="cart-layout"><section>{items.map(i=><div className="cart-item" key={i.product}><img src={assetUrl(i.image_name)} alt={i.name}/><div className="cart-main"><div className="cart-item-head"><h3>{i.name}</h3><button className="icon-danger" onClick={()=>remove(i.product)} aria-label="Remove item"><Trash2 size={17}/></button></div><strong>Rs {Number(i.price).toLocaleString("en-IN")}</strong><div className="qty"><button onClick={()=>update(i.product,i.quantity-1)}><Minus size={14}/></button><span>{i.quantity}</span><button onClick={()=>update(i.product,i.quantity+1)}><Plus size={14}/></button></div></div></div>)}<div className="cart-trust"><span><ShieldCheck size={16}/>Secure checkout</span><span>Free shipping</span><span>COD available</span></div></section><aside className="summary"><p className="eyebrow">ORDER SUMMARY</p><h2>Almost yours.</h2><div><span>Subtotal</span><strong>Rs {Number(total).toLocaleString("en-IN")}</strong></div><div><span>Shipping</span><strong className="good-text">Free</strong></div><hr/><div className="total"><span>Total</span><strong>Rs {Number(total).toLocaleString("en-IN")}</strong></div><button className="primary" onClick={()=>nav("/checkout")}>Proceed to checkout <ArrowRight size={17}/></button></aside></div>{suggestions.length>0&&<section className="cross-sell"><div className="section-head"><div><p className="eyebrow">COMPLETE THE SETUP</p><h2>Good additions, no guesswork.</h2></div><Link to="/products">See more <ArrowRight size={16}/></Link></div><div className="product-grid">{suggestions.map(p=><ProductCard key={p._id} product={p}/>)}</div></section>}</main>;
 }
