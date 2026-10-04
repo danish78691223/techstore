@@ -1,0 +1,12 @@
+import { useEffect,useState } from "react";
+import { useNavigate,useParams } from "react-router-dom";
+import { Save,ArrowLeft,Upload } from "lucide-react";
+import api,{assetUrl} from "../../services/api";
+export default function EditProduct(){
+ const {id}=useParams(),nav=useNavigate();
+ const [form,setForm]=useState({name:"",price:"",stock:"",description:""}),[image,setImage]=useState(null),[current,setCurrent]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);
+ useEffect(()=>{api.get("/products/"+id).then(r=>{const p=r.data;setForm({name:p.name||"",price:p.price??"",stock:p.stock??"",description:p.description||""});setCurrent(p.image_name||"");}).catch(e=>setError(e.response?.data?.message||"Product not found"));},[id]);
+ const set=(k,v)=>setForm({...form,[k]:v});
+ const submit=async e=>{e.preventDefault();setBusy(true);setError("");const fd=new FormData();Object.entries(form).forEach(([k,v])=>fd.append(k,v));if(image)fd.append("image",image);try{await api.put("/products/"+id,fd);nav("/admin/products");}catch(e){setError(e.response?.data?.message||"Update failed");}finally{setBusy(false);}};
+ return <div className="edit-page"><div className="list-head"><div><p className="eyebrow">CATALOG CONTROL</p><h2>Edit product</h2></div><button className="ghost-button" onClick={()=>nav("/admin/products")}><ArrowLeft size={16}/>Back to products</button></div><form className="product-form-card" onSubmit={submit}>{error&&<div className="error">{error}</div>}<div className="product-form-grid"><div><label>Product name<input required value={form.name} onChange={e=>set("name",e.target.value)}/></label><label>Price<input required type="number" min="0" value={form.price} onChange={e=>set("price",e.target.value)}/></label><label>Stock<input required type="number" min="0" value={form.stock} onChange={e=>set("stock",e.target.value)}/></label><label>Description<textarea value={form.description} onChange={e=>set("description",e.target.value)}/></label></div><div className="image-uploader">{current?<img src={assetUrl(current)} alt="Current product"/>:<div className="image-placeholder">No image</div>}<label className="upload-button"><Upload size={17}/>Choose new image<input type="file" accept="image/*" onChange={e=>setImage(e.target.files?.[0]||null)} hidden/></label>{image&&<small>{image.name}</small>}</div></div><button className="primary" disabled={busy}>{busy?"Saving...":"Save changes"}<Save size={17}/></button></form></div>;
+}
