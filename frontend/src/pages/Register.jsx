@@ -95,7 +95,7 @@ export default function Register() {
             <form onSubmit={submit}>
               <label>Full name<input placeholder="Your name" required value={form.name} onChange={e => setForm({...form, name:e.target.value})}/></label>
               <label>Email address<input type="email" placeholder="you@example.com" required value={form.email} onChange={e => setForm({...form, email:e.target.value})}/></label>
-              <label>Password><div className="password-field"><input type={show?"text":"password"} placeholder="Create a password" required value={form.password} onChange={e => setForm({...form,password:e.target.value})}/><button type="button" onClick={() => setShow(v => !v)}>{show?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label>
+              <label>Password<div className="password-field"><input type={show?"text":"password"} placeholder="Create a password" required value={form.password} onChange={e => setForm({...form,password:e.target.value})}/><button type="button" onClick={() => setShow(v => !v)}>{show?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label>
               <label>Confirm password<input type="password" placeholder="Repeat password" required value={form.confirm_password} onChange={e => setForm({...form,confirm_password:e.target.value})}/></label>
               <button className="primary auth-submit" disabled={busy}>{busy?"Sending code...":"Create account"}<UserPlus size={17}/></button>
             </form>
