@@ -11,9 +11,9 @@ export function generateOtp(){ return String(crypto.randomInt(100000,1000000)); 
 export function hashOtp(otp){ return crypto.createHash("sha256").update(String(otp)).digest("hex"); }
 
 export async function sendBrevoEmail({toEmail,toName,subject,htmlContent,textContent}){
-  const apiKey=process.env.BREVO_API_KEY;
-  const senderEmail=process.env.BREVO_SENDER_EMAIL;
-  const senderName=process.env.BREVO_SENDER_NAME || "Tech Nexus";
+  const apiKey=String(process.env.BREVO_API_KEY || "").trim();
+  const senderEmail=String(process.env.BREVO_SENDER_EMAIL || "").trim();
+  const senderName=String(process.env.BREVO_SENDER_NAME || "Tech Nexus").trim();
   if(!apiKey || !senderEmail) throw new Error("Brevo email configuration is missing");
   const response=await fetch(BREVO_URL,{
     method:"POST",
