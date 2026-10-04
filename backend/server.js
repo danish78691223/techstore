@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 //import dns from "dns";
@@ -33,6 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use(notFound);
 app.use(errorHandler);
 const port = process.env.PORT || 5000;
