@@ -1,55 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
+import { MapPin,ShieldCheck,ArrowLeft,CheckCircle2,Truck } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import api from "../services/api";
-export default function Checkout() {
-  const { items, total, clear } = useCart();
-  const [address, setAddress] = useState(""),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  const nav = useNavigate();
-  const submit = async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      await api.post("/orders", {
-        items: items.map((i) => ({ product: i.product, quantity: i.quantity })),
-        address,
-      });
-      clear();
-      nav("/orders");
-    } catch (x) {
-      setError(x.response?.data?.message || "Order failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <main className="container page">
-      <h1>Checkout</h1>
-      <div className="checkout">
-        <form className="form-card" onSubmit={submit}>
-          <h2>Delivery Details</h2>
-          {error && <div className="error">{error}</div>}
-          <textarea
-            required
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Full delivery address"
-          />
-          <button className="primary" disabled={busy}>
-            {busy ? "Placing Order..." : "Place COD Order"}
-          </button>
-        </form>
-        <aside className="summary">
-          <h2>Total</h2>
-          <div className="total">
-            <span>Payable</span>
-            <strong>Rs {total.toLocaleString("en-IN")}</strong>
-          </div>
-          <p>Payment method: Cash on Delivery</p>
-        </aside>
-      </div>
-    </main>
-  );
+export default function Checkout(){
+ const {items,total,clear}=useCart();const [address,setAddress]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);const nav=useNavigate();
+ const submit=async e=>{e.preventDefault();setBusy(true);setError("");try{await api.post("/orders",{items:items.map(i=>({product:i.product,quantity:i.quantity})),address});clear();nav("/orders");}catch(x){setError(x.response?.data?.message||"Order failed");}finally{setBusy(false);}};
+ if(!items.length)return <main className="container page empty"><h1>Your cart is empty.</h1><p>Add products before checking out.</p><Link className="hero-btn" to="/products">Back to shop</Link></main>;
+ return <main className="container page checkout-page"><div className="section-head"><div><p className="eyebrow">FINAL STEP</p><h1>Checkout</h1><p className="muted">Secure your order with simple Cash on Delivery.</p></div><Link className="ghost-button" to="/cart"><ArrowLeft size={16}/>Back to cart</Link></div><div className="checkout"><form className="form-card checkout-form" onSubmit={submit}><div className="form-heading"><div className="checkout-icon"><MapPin size={18}/></div><div><h2>Delivery details</h2><p>Where should we send your order?</p></div></div>{error&&<div className="error">{error}</div>}<label>Full delivery address<textarea required value={address} onChange={e=>setAddress(e.target.value)} placeholder="House / flat, street, city, state and PIN code"/></label><button className="primary" disabled={busy}>{busy?"Placing your order...":"Place COD order"}<CheckCircle2 size={17}/></button><div className="checkout-trust"><span><ShieldCheck size={15}/>Secure account</span><span><Truck size={15}/>Free shipping</span><span>Cash on delivery</span></div></form><aside className="summary"><p className="eyebrow">ORDER SUMMARY</p><h2>{items.length} item{items.length>1?"s":""} ready.</h2>{items.slice(0,4).map(i=><div className="checkout-item" key={i.product}><span>{i.name} × {i.quantity}</span><strong>Rs {Number(i.price*i.quantity).toLocaleString("en-IN")}</strong></div>)}{items.length>4&&<p className="muted">+ {items.length-4} more items</p>}<hr/><div><span>Shipping</span><strong className="good-text">Free</strong></div><div className="total"><span>Payable</span><strong>Rs {Number(total).toLocaleString("en-IN")}</strong></div></aside></div></main>;
 }
