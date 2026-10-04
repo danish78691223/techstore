@@ -1,55 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect,useMemo,useState } from "react";
 import { Link } from "react-router-dom";
-import api, { assetUrl } from "../../services/api";
-export default function Products() {
-  const [ps, setPs] = useState([]);
-  const load = () => api.get("/products").then((r) => setPs(r.data));
-  useEffect(() => {
-    load();
-  }, []);
-  const del = async (id) => {
-    if (!confirm("Delete this product?")) return;
-    await api.delete("/products/" + id);
-    load();
-  };
-  return (
-    <>
-      <div className="section-head">
-        <h1>Manage Products</h1>
-        <Link className="primary small" to="/admin/products/add">
-          + Add New
-        </Link>
-      </div>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ps.map((p) => (
-              <tr key={p._id}>
-                <td>
-                  <img className="table-img" src={assetUrl(p.image_name)} />
-                </td>
-                <td>{p.name}</td>
-                <td>Rs {p.price}</td>
-                <td>{p.stock}</td>
-                <td>
-                  <button className="danger" onClick={() => del(p._id)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
+import { Search,Filter,Edit3,Trash2,Plus,PackageOpen } from "lucide-react";
+import api,{assetUrl} from "../../services/api";
+export default function Products(){
+ const [ps,setPs]=useState([]),[search,setSearch]=useState(""),[stockFilter,setStockFilter]=useState("all"),[loading,setLoading]=useState(true);
+ const load=()=>{setLoading(true);api.get("/products").then(r=>setPs(r.data)).catch(console.error).finally(()=>setLoading(false));};
+ useEffect(load,[]);
+ const filtered=useMemo(()=>ps.filter(p=>(!search||p.name.toLowerCase().includes(search.toLowerCase()))&&(stockFilter==="all"||(stockFilter==="low"&&p.stock<=5)||(stockFilter==="out"&&p.stock===0))),[ps,search,stockFilter]);
+ const del=async id=>{if(!window.confirm("Delete this product? This action cannot be undone."))return;try{await api.delete("/products/"+id);load();}catch(e){alert(e.response?.data?.message||"Delete failed");}};
+ return <div className="admin-list-page"><div className="list-head"><div><p className="eyebrow">CATALOG CONTROL</p><h2>Products</h2><p className="muted">Manage pricing, stock and the products customers see.</p></div><Link className="primary small" to="/admin/products/add"><Plus size={16}/>Add product</Link></div>
+ <div className="list-toolbar"><div className="search-wrap"><Search size={17}/><input className="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search products..."/></div><div className="filter-group"><Filter size={15}/><button className={stockFilter==="all"?"selected":""} onClick={()=>setStockFilter("all")}>All</button><button className={stockFilter==="low"?"selected":""} onClick={()=>setStockFilter("low")}>Low stock</button><button className={stockFilter==="out"?"selected":""} onClick={()=>setStockFilter("out")}>Out of stock</button></div></div>
+ <div className="table-wrap">{loading?<div className="table-loading">Loading catalog...</div>:filtered.length?<table><thead><tr><th>Product</th><th>Price</th><th>Inventory</th><th>Created</th><th>Actions</th></tr></thead><tbody>{filtered.map(p=><tr key={p._id}><td><div className="table-product"><img className="table-img" src={assetUrl(p.image_name)} /><div><b>{p.name}</b><small>{p.description||"No description"}</small></div></div></td><td><b>Rs {Number(p.price).toLocaleString("en-IN")}</b></td><td><span className={"stock-badge "+(p.stock===0?"out":p.stock<=5?"low":"ok")}>{p.stock===0?"Out of stock":p.stock+" in stock"}</span></td><td>{p.createdAt?new Date(p.createdAt).toLocaleDateString("en-IN"):"—"}</td><td><div className="table-actions"><Link className="icon-action" to={"/admin/products/"+p._id+"/edit"} aria-label="Edit product"><Edit3 size={16}/></Link><button className="icon-action danger-icon" onClick={()=>del(p._id)} aria-label="Delete product"><Trash2 size={16}/></button></div></td></tr>)}</tbody></table>:<div className="empty small-empty"><PackageOpen size={28}/><p>No products match this filter.</p></div>}</div>
+ <p className="table-count">{filtered.length} of {ps.length} products shown</p></div>;
 }
