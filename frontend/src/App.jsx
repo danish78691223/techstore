@@ -16,7 +16,9 @@ import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import AddProduct from "./pages/admin/AddProduct";
 import AdminOrders from "./pages/admin/Orders";
+import Analytics from "./pages/admin/Analytics";
 import "./styles/global.css";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -29,34 +31,14 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/cart" element={<Cart />} />
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                <ProtectedRoute>
-                  <MyOrders />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute admin>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
+            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute admin><AdminLayout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="products/add" element={<AddProduct />} />
               <Route path="orders" element={<AdminOrders />} />
+              <Route path="analytics" element={<Analytics />} />
             </Route>
           </Routes>
           <Footer />
