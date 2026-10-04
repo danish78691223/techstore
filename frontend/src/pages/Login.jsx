@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, LockKeyhole, ArrowRight, ShieldCheck } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 export default function Login(){
  const [form,setForm]=useState({email:"",password:""}),[error,setError]=useState(""),[show,setShow]=useState(false),[busy,setBusy]=useState(false);
  const {login}=useAuth(), nav=useNavigate();
+ const [params]=useSearchParams();
  const submit=async e=>{e.preventDefault();setBusy(true);setError("");try{await login(form);nav("/");}catch(x){setError(x.response?.data?.message||"Login failed");}finally{setBusy(false);}};
  return <main className="auth-page"><div className="auth-card"><div className="auth-top"><div className="brand big"><span className="brand-mark">TN</span><span>TECH NEXUS<small>SMART TECH. BETTER LIVING.</small></span></div><div className="security-chip"><ShieldCheck size={15}/>Secure access</div></div><h2>Welcome back.</h2><p className="auth-sub">Sign in to pick up where you left off.</p>{error&&<div className="error">{error}</div>}<form onSubmit={submit}><label>Email address<input type="email" placeholder="you@example.com" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label><label>Password<div className="password-field"><input type={show?"text":"password"} placeholder="••••••••" required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/><button type="button" onClick={()=>setShow(v=>!v)}>{show?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label><button className="primary auth-submit" disabled={busy}>{busy?"Signing in...":"Sign in"}<ArrowRight size={17}/></button></form><p>New to Tech Nexus? <Link to="/register">Create an account</Link></p><div className="auth-trust"><LockKeyhole size={15}/> Your account is protected with secure authentication.</div></div></main>;
 }
