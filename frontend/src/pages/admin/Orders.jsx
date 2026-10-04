@@ -1,55 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect,useMemo,useState } from "react";
+import { Search,Filter,RefreshCw,Truck,CheckCircle,Clock } from "lucide-react";
 import api from "../../services/api";
-export default function Orders() {
-  const [orders, setOrders] = useState([]);
-  const load = () => api.get("/orders").then((r) => setOrders(r.data));
-  useEffect(() => {
-    load();
-  }, []);
-  const change = async (id, status) => {
-    await api.patch(`/orders/${id}/status`, { status });
-    load();
-  };
-  return (
-    <>
-      <h1>Manage Orders</h1>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <tr key={o._id}>
-                <td>#{o._id.slice(-8).toUpperCase()}</td>
-                <td>
-                  {o.user?.name}
-                  <br />
-                  <small>{o.user?.email}</small>
-                </td>
-                <td>Rs {o.total_price}</td>
-                <td>{o.status}</td>
-                <td>
-                  <select
-                    value={o.status}
-                    onChange={(e) => change(o._id, e.target.value)}
-                  >
-                    <option>Pending</option>
-                    <option>Shipped</option>
-                    <option>Delivered</option>
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
+export default function Orders(){
+ const [orders,setOrders]=useState([]),[status,setStatus]=useState("all"),[search,setSearch]=useState(""),[loading,setLoading]=useState(true);
+ const load=()=>{setLoading(true);api.get("/orders").then(r=>setOrders(r.data)).catch(console.error).finally(()=>setLoading(false));};useEffect(load,[]);
+ const filtered=useMemo(()=>orders.filter(o=>(status==="all"||o.status===status)&&(!search||o._id.toLowerCase().includes(search.toLowerCase())||o.user?.name?.toLowerCase().includes(search.toLowerCase())||o.user?.email?.toLowerCase().includes(search.toLowerCase()))),[orders,status,search]);
+ const change=async(id,next)=>{try{await api.patch("/orders/"+id+"/status",{status:next});load();}catch(e){alert(e.response?.data?.message||"Could not update order");}};
+ const icon=s=>s==="Delivered"?CheckCircle:s==="Shipped"?Truck:Clock;
+ return <div className="admin-list-page"><div className="list-head"><div><p className="eyebrow">FULFILMENT QUEUE</p><h2>Orders</h2><p className="muted">Process every order with clear status and customer context.</p></div><button className="ghost-button" onClick={load}><RefreshCw size={16}/>Refresh</button></div><div className="order-filters"><div className="search-wrap"><Search size={17}/><input className="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search order or customer..."/></div><div className="filter-group"><Filter size={15}/>{["all","Pending","Shipped","Delivered"].map(x=><button key={x} className={status===x?"selected":""} onClick={()=>setStatus(x)}>{x==="all"?"All":x}</button>)}</div></div><div className="table-wrap">{loading?<div className="table-loading">Loading orders...</div>:filtered.length?<table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th></tr></thead><tbody>{filtered.map(o=>{const Icon=icon(o.status);return <tr key={o._id}><td><b>#{o._id.slice(-8).toUpperCase()}</b><small className="cell-muted">{new Date(o.createdAt).toLocaleDateString("en-IN")}</small></td><td><div><b>{o.user?.name||"Customer"}</b><small className="cell-muted">{o.user?.email||"—"}</small></div></td><td>{o.items?.reduce((n,x)=>n+x.quantity,0)||0} units</td><td><b>Rs {Number(o.total_price||0).toLocaleString("en-IN")}</b></td><td><span className={"status "+o.status.toLowerCase()}><Icon size={13}/>{o.status}</span></td><td><select value={o.status} onChange={e=>change(o._id,e.target.value)}><option>Pending</option><option>Shipped</option><option>Delivered</option></select></td></tr>})}</tbody></table>:<div className="empty small-empty"><Clock size={27}/><p>No orders match the current filter.</p></div>}</div><p className="table-count">{filtered.length} of {orders.length} orders shown</p></div>;
 }
