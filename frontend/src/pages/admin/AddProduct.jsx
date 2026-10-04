@@ -1,67 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Upload,ArrowLeft,PackagePlus } from "lucide-react";
 import api from "../../services/api";
-export default function AddProduct() {
-  const [form, setForm] = useState({
-      name: "",
-      price: "",
-      stock: "",
-      description: "",
-    }),
-    [image, setImage] = useState(null),
-    [error, setError] = useState("");
-  const nav = useNavigate();
-  const submit = async (e) => {
-    e.preventDefault();
-    const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    if (image) fd.append("image", image);
-    try {
-      await api.post("/products", fd);
-      nav("/admin/products");
-    } catch (x) {
-      setError(x.response?.data?.message || "Failed");
-    }
-  };
-  return (
-    <>
-      <h1>Add New Product</h1>
-      <form className="form-card narrow" onSubmit={submit}>
-        {error && <div className="error">{error}</div>}
-        <input
-          required
-          placeholder="Product Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <input
-          required
-          type="number"
-          min="0"
-          placeholder="Price (Rs)"
-          value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
-        />
-        <input
-          required
-          type="number"
-          min="0"
-          placeholder="Stock"
-          value={form.stock}
-          onChange={(e) => setForm({ ...form, stock: e.target.value })}
-        />
-        <textarea
-          placeholder="Description"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
-        />
-        <button className="primary">Upload Product</button>
-      </form>
-    </>
-  );
+export default function AddProduct(){
+ const [form,setForm]=useState({name:"",price:"",stock:"",description:""}),[image,setImage]=useState(null),[error,setError]=useState(""),[busy,setBusy]=useState(false);
+ const nav=useNavigate();const set=(k,v)=>setForm({...form,[k]:v});
+ const submit=async e=>{e.preventDefault();setBusy(true);setError("");const fd=new FormData();Object.entries(form).forEach(([k,v])=>fd.append(k,v));if(image)fd.append("image",image);try{await api.post("/products",fd);nav("/admin/products");}catch(x){setError(x.response?.data?.message||"Failed to create product");}finally{setBusy(false);}};
+ return <div className="edit-page"><div className="list-head"><div><p className="eyebrow">CATALOG CONTROL</p><h2>Add a product</h2><p className="muted">Create a listing that looks sharp on the storefront.</p></div><button className="ghost-button" onClick={()=>nav("/admin/products")}><ArrowLeft size={16}/>Back to products</button></div><form className="product-form-card" onSubmit={submit}>{error&&<div className="error">{error}</div>}<div className="product-form-grid"><div><label>Product name<input required placeholder="e.g. Pro Wireless Headset" value={form.name} onChange={e=>set("name",e.target.value)}/></label><label>Price<input required type="number" min="0" placeholder="0" value={form.price} onChange={e=>set("price",e.target.value)}/></label><label>Stock<input required type="number" min="0" placeholder="0" value={form.stock} onChange={e=>set("stock",e.target.value)}/></label><label>Description<textarea placeholder="Tell shoppers why this product belongs in their setup." value={form.description} onChange={e=>set("description",e.target.value)}/></label></div><div className="image-uploader"><div className="image-placeholder"><PackagePlus size={30}/><b>Product image</b><small>JPG, PNG or WebP</small></div><label className="upload-button"><Upload size={17}/>Choose image<input type="file" accept="image/*" onChange={e=>setImage(e.target.files?.[0]||null)} hidden/></label>{image&&<small>{image.name}</small>}</div></div><button className="primary" disabled={busy}>{busy?"Publishing...":"Publish product"}<PackagePlus size={17}/></button></form></div>;
 }
