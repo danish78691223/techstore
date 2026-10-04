@@ -11,6 +11,10 @@ const schema = new mongoose.Schema(
     },
     password: { type: String, required: true },
     role: { type: String, enum: ["admin", "customer"], default: "customer" },
+    isEmailVerified: { type: Boolean, default: true },
+    emailOtpHash: { type: String, default: "" },
+    emailOtpExpiresAt: { type: Date, default: null },
+    emailOtpLastSentAt: { type: Date, default: null },
   },
   { timestamps: true },
 );
