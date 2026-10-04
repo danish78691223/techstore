@@ -31,6 +31,6 @@ export async function createReview(req,res){
     res.status(201).json(await review.populate("user","name"));
   }catch(e){
     if(e?.code===11000) return res.status(409).json({message:"You have already reviewed this product"});
-    throw e;
+    return res.status(500).json({message:"Could not save review"});
   }
 }
