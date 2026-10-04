@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import CartToast from "./components/CartToast";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -21,7 +22,7 @@ import Analytics from "./pages/admin/Analytics";
 import "./styles/global.css";
 
 export default function App(){
- return <AuthProvider><CartProvider><BrowserRouter><Navbar/><Routes>
+ return <AuthProvider><CartProvider><BrowserRouter><Navbar/><CartToast/><Routes>
   <Route path="/" element={<Home/>}/><Route path="/products" element={<Products/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Register/>}/><Route path="/cart" element={<Cart/>}/>
   <Route path="/checkout" element={<ProtectedRoute><Checkout/></ProtectedRoute>}/><Route path="/orders" element={<ProtectedRoute><MyOrders/></ProtectedRoute>}/>
   <Route path="/admin" element={<ProtectedRoute admin><AdminLayout/></ProtectedRoute>}>
