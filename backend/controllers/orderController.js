@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import { sendOrderConfirmationEmail } from "../utils/emailService.js";
 export async function createOrder(req, res) {
   const { items, address } = req.body;
   if (!Array.isArray(items) || !items.length || !address)
@@ -36,7 +37,10 @@ export async function createOrder(req, res) {
     await Product.findByIdAndUpdate(i.product, {
       $inc: { stock: -i.quantity },
     });
-  res.status(201).json(await order.populate("user", "name email"));
+  const populated = await order.populate("user", "name email");
+  sendOrderConfirmationEmail({ name: req.user.name, email: req.user.email, order: populated })
+    .catch(error => console.error("Order confirmation email error:", error));
+  res.status(201).json(populated);
 }
 export async function myOrders(req, res) {
   res.json(await Order.find({ user: req.user._id }).sort({ createdAt: -1 }));
